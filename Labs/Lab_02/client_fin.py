@@ -4,7 +4,7 @@ import threading
 from threading import Timer
 import random
 
-THRESHOLD = 50
+THRESHOLD = 1000
 SERVER = socket.gethostbyname(socket.gethostname())
 PORT = 5000
 ADDR = (SERVER, PORT)

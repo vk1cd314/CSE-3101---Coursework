@@ -19,7 +19,7 @@ requests = {
 
 requestID = 1
 
-THRESHOLD = 50
+THRESHOLD = 1000
 PORT = 5000
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
