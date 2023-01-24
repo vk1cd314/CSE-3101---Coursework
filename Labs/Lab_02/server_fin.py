@@ -19,7 +19,7 @@ requests = {
 
 requestID = 1
 
-THRESHOLD = 10
+THRESHOLD = 50
 PORT = 5000
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
@@ -132,14 +132,14 @@ def start():
                     taka[id] -= amount
                     confirmation = f"{amount} Withdrawn. Current Balance {taka[id]}"
                     requests.update({requestID : confirmation})
-                    rando = random.randint(0,9)
+                    rando = random.randint(0,99)
                     if rando > THRESHOLD:
                         continue
                     send(conn, confirmation)
                 else:
                     confirmation = "insufficeint funds"
                     send(conn, confirmation)
-                    rando = random.randint(0,9)
+                    rando = random.randint(0,99)
                     if rando > THRESHOLD:
                         continue
                     requests.update({requestID : confirmation})
@@ -148,7 +148,7 @@ def start():
                 taka[id] += amount
                 confirmation = f"{amount} Deposited. Current Balance {taka[id]}"
                 requests.update({requestID : confirmation})
-                rando = random.randint(0,9)
+                rando = random.randint(0,99)
                 if rando > THRESHOLD:
                     continue
                 send(conn, confirmation)

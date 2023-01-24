@@ -4,7 +4,7 @@ import threading
 from threading import Timer
 import random
 
-THRESHOLD = 1
+THRESHOLD = 50
 SERVER = socket.gethostbyname(socket.gethostname())
 PORT = 5000
 ADDR = (SERVER, PORT)
@@ -20,8 +20,7 @@ class RepeatTimer(Timer):
 def send(msg):
     message = msg.encode()
     client.send(message)
-    print(msg)
-
+    # print(msg)
 
 while True:
     #thread = threading.Thread(target=display)
@@ -42,14 +41,14 @@ while True:
             while reqLoop:
                 data = client.recv(1024).decode()
                 if data:
-                    rando = random.randint(0,9)
+                    rando = random.randint(0,99)
                     if rando > THRESHOLD:
                         continue
                     sendTd.cancel()
                     print(data)
                     end = time.time()
                     #elapsed_time = time.process_time()-t
-                    print(f"elapsed time: {end - start }")
+                    print(f"elapsed time: {end - start}")
                     reqLoop = False
             continue
         if ("Logged" in data) or ("Withdrawn" in data) or ("Deposited" in data) or (("Enter" in data)):
