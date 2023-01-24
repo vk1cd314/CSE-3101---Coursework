@@ -4,7 +4,7 @@ import threading
 from threading import Timer
 import random
 
-THRESHOLD = 0
+THRESHOLD = 1
 SERVER = socket.gethostbyname(socket.gethostname())
 PORT = 5000
 ADDR = (SERVER, PORT)
@@ -20,43 +20,37 @@ class RepeatTimer(Timer):
 def send(msg):
     message = msg.encode()
     client.send(message)
+    print(msg)
 
-def display():
-    while True:
-        data = client.recv(1024).decode()
-        if data:
-            if "requestID" in data:
-                rID = data.partition("requestId:")[2]
-                print(rID+"requestID")
-                inp = input('->')
-                req = f"{rID},{inp}"
-                send(inp)
-                print(req)
-            else:
-                print(data)
 
 while True:
+    #thread = threading.Thread(target=display)
+    #thread.start()
     data = client.recv(1024).decode()
     if data:
         if "requestId" in data:
             print(data)
             rID = data.partition("requestId:")[2]
+            #print(rID+"requestID")
             inp = input('->')
             req = f"{rID},{inp}"
-            t = time.process_time()
+            #t = time.process_time()
+            start = time.time()
             sendTd = RepeatTimer(1, send, [req])
             sendTd.start()
-            while True:
+            reqLoop = True
+            while reqLoop:
                 data = client.recv(1024).decode()
                 if data:
-                    rando = random.randint(0,99)
+                    rando = random.randint(0,9)
                     if rando > THRESHOLD:
                         continue
                     sendTd.cancel()
                     print(data)
-                    elapsed_time = time.process_time()-t
-                    print(f"elapsed time: {elapsed_time}")
-                    break
+                    end = time.time()
+                    #elapsed_time = time.process_time()-t
+                    print(f"elapsed time: {end - start }")
+                    reqLoop = False
             continue
         if ("Logged" in data) or ("Withdrawn" in data) or ("Deposited" in data) or (("Enter" in data)):
             print(data+"\n")

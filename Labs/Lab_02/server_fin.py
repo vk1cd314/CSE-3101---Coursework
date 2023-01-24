@@ -19,7 +19,7 @@ requests = {
 
 requestID = 1
 
-THRESHOLD = 0
+THRESHOLD = 10
 PORT = 5000
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
@@ -54,6 +54,7 @@ def start():
     conn, addr = server.accept()
     connected = True
     print(f"{addr} connected.")
+    #timer1 = RepeatTimer(2, sendTimed, [conn, "Withdrawn"])
     logged = False
     useridInp = False 
     prompted = False
@@ -65,12 +66,13 @@ def start():
             send(conn, "Please enter your UserID")
         if logged == False or prompted == True: 
             data = conn.recv(1024).decode()
-
+                
         if data:
             if "," in data:
                 req_data = data.split(",")
-                if int(req_data[0]) in requests.keys():
+                if int(req_data[0].strip()) in requests.keys():
                     send(conn, requests[int(req_data[0])])
+                    continue
                 else :
                     data = req_data[1]
             if data == "bye":
@@ -130,14 +132,14 @@ def start():
                     taka[id] -= amount
                     confirmation = f"{amount} Withdrawn. Current Balance {taka[id]}"
                     requests.update({requestID : confirmation})
-                    rando = random.randint(0,99)
+                    rando = random.randint(0,9)
                     if rando > THRESHOLD:
                         continue
                     send(conn, confirmation)
                 else:
                     confirmation = "insufficeint funds"
                     send(conn, confirmation)
-                    rando = random.randint(0,99)
+                    rando = random.randint(0,9)
                     if rando > THRESHOLD:
                         continue
                     requests.update({requestID : confirmation})
@@ -146,7 +148,7 @@ def start():
                 taka[id] += amount
                 confirmation = f"{amount} Deposited. Current Balance {taka[id]}"
                 requests.update({requestID : confirmation})
-                rando = random.randint(0,99)
+                rando = random.randint(0,9)
                 if rando > THRESHOLD:
                     continue
                 send(conn, confirmation)
