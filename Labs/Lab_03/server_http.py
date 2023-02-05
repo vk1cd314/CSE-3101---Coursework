@@ -39,7 +39,7 @@ class S(BaseHTTPRequestHandler):
                 
                 with open(filename, "wb") as f:
                     f.write(file_content)
-        
+
         val._set_response()
         val.wfile.write(f"File '{filename}' received and saved".encode('utf-8'))
         
