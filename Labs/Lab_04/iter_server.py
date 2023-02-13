@@ -5,7 +5,7 @@ def handle_request(data, client_address):
     request = dns.message.from_wire(data)
     response = dns.message.make_response(request)
 
-    rrset = dns.rrset.from_text("cse.du.ac.bd.", 300, dns.rdataclass.IN, "A", "192.0.2.3")
+    rrset = dns.rrset.from_text("cse.du.ac.bd.", 86400, dns.rdataclass.IN, "A", "192.0.2.3")
     response.answer.append(rrset)
     rrset = dns.rrset.from_text("ns1.cse.du.ac.bd.", 86400, dns.rdataclass.IN, "A", "192.0.2.1")
     response.answer.append(rrset)
