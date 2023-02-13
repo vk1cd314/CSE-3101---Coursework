@@ -5,8 +5,14 @@ def handle_request(data, client_address):
     request = dns.message.from_wire(data)
     response = dns.message.make_response(request)
 
-    response.answer.append(dns.rrset.from_text("cse.du.ac.bd.",
-                           300, dns.rdataclass.IN, dns.rdatatype.A, "192.0.2.3"))
+    rrset = dns.rrset.from_text("cse.du.ac.bd.", 300, dns.rdataclass.IN, "A", "192.0.2.3")
+    response.answer.append(rrset)
+    rrset = dns.rrset.from_text("ns1.cse.du.ac.bd.", 86400, dns.rdataclass.IN, "A", "192.0.2.1")
+    response.answer.append(rrset)
+    rrset = dns.rrset.from_text("ns2.cse.du.ac.bd.", 86400, dns.rdataclass.IN, "A", "192.0.2.2")
+    response.answer.append(rrset)
+    rrset = dns.rrset.from_text("mail.cse.du.ac.bd.", 86400, dns.rdataclass.IN, "A", "192.0.2.4")
+    response.answer.append(rrset)
 
     return response.to_wire()
 
