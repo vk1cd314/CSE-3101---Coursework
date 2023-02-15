@@ -37,4 +37,4 @@ def iterative_resolve(domain, qtype):
 
     return response
 
-print(iterative_resolve("cse.du.ac.bd.", dns.rdatatype.AAAA))
+print(iterative_resolve("www.cse.du.ac.bd.", dns.rdatatype.CNAME))
