@@ -10,13 +10,15 @@ def iterative_resolve(domain, qtype):
 
     while True:
         if authoritative_servers:
-            server = authoritative_servers.pop()
+            server = "127.0.0.1"
+            query = dns.message.make_query(authoritative_servers.pop(), "A")
+            # break
         else:
             server = "127.0.0.1"
 
-        # print(f"DEBUG: Querying {server} for {domain} ({qtype})\n\n")
+        print(f"DEBUG: Querying {server} for {domain} ({qtype})\n\n")
         response = dns.query.udp(query, server, port=5050)
-        # print(f"DEBUG: Got response: {response}\n\n")
+        print(f"DEBUG: Got response: {response}\n\n")
 
         if response.rcode() == dns.rcode.NOERROR:
             if len(response.authority) > 0:
@@ -24,7 +26,7 @@ def iterative_resolve(domain, qtype):
                     if rrset.rdtype == dns.rdatatype.NS:
                         for rdata in rrset:
                             authoritative_servers.append(str(rdata))
-                # print(f"DEBUG: Adding authoritative servers: {authoritative_servers}\n\n")
+                print(f"DEBUG: Adding authoritative servers: {authoritative_servers}\n\n")
             else:
                 break
         else:
@@ -35,4 +37,4 @@ def iterative_resolve(domain, qtype):
 
     return response
 
-print(iterative_resolve("cse.du.ac.bd.", dns.rdatatype.A))
+print(iterative_resolve("cse.du.ac.bd.", dns.rdatatype.AAAA))
