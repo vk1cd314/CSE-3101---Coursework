@@ -29,6 +29,7 @@ mpMX = {
 }
 
 def recurse(domain_name, qtype):
+    print(f"DEBUG: Query for {domain_name} with type {qtype}")
     ret = []
     if qtype == "A":
         ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpA[domain_name]));
