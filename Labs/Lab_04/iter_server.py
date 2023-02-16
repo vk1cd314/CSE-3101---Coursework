@@ -41,7 +41,7 @@ def handle_request(data, client_address):
             response.answer.append(rrset)
         elif qtype == "CNAME":
             rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpCNAME[domain_name])
-            response.answer.append(rrset)
+            response.authority.append(rrset)
         elif qtype == "MX":
             rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpMX[domain_name])
             response.answer.append(rrset)
