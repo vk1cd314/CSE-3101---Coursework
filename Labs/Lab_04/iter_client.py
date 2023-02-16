@@ -32,14 +32,14 @@ def iterative_resolve(domain, qtype):
 
     while True:
         if authoritative_servers:
-            new_domain = authoritative_servers.pop()
-            qtype = check_dns_record_type(new_domain)
-            if new_domain == "cse.du.ac.bd.":
+            domain = authoritative_servers.pop()
+            qtype = check_dns_record_type(domain)
+            if domain == "cse.du.ac.bd.":
                 qtype = dns.rdatatype.NS
             elif qtype == "NS":
                 qtype = "A"
-            query = dns.message.make_query(new_domain, qtype)
-            print(f"DEBUG: Querying {server} for {new_domain} ({qtype})\n\n")
+            query = dns.message.make_query(domain, qtype)
+            print(f"DEBUG: Querying {server} for {domain} ({qtype})\n\n")
         else:
             print(f"DEBUG: Querying {server} for {domain} ({qtype})\n\n")
         response = dns.query.udp(query, server, port=5050)
