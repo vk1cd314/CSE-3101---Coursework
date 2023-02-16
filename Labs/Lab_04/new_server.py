@@ -35,7 +35,7 @@ def handle_request(data, client_address):
         domain_name, qtype = item.to_text().split(" IN ")
         if qtype == "NS":
             rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpNS[domain_name]);
-            response.authority.append(rrset)
+            response.answer.append(rrset)
         elif qtype == "AAAA":
             rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpAAAA[domain_name]);
             response.answer.append(rrset)
