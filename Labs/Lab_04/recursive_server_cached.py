@@ -1,4 +1,3 @@
-# import re
 import socket
 import dns.message
 
@@ -51,12 +50,14 @@ def recurse(domain_name, qtype):
         retrec = recurse(mpNS[domain_name], "A")
         for item in retrec:
             ret.append(item)
+        mapCache[[domain_name, qtype]] = ret
         return ret
     if qtype == "CNAME":
         ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpCNAME[domain_name]))
         retrec = recurse(mpCNAME[domain_name], "NS")
         for item in retrec:
             ret.append(item)
+        mapCache[[domain_name, qtype]] = ret
         return ret
     return None
 
