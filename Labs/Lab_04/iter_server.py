@@ -34,19 +34,19 @@ def handle_request(data, client_address):
     for item in request.question:
         domain_name, qtype = item.to_text().split(" IN ")
         if qtype == "NS":
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpNS[domain_name]);
+            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpNS[domain_name])
             response.authority.append(rrset)
         elif qtype == "AAAA":
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpAAAA[domain_name]);
+            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpAAAA[domain_name])
             response.answer.append(rrset)
         elif qtype == "CNAME":
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpCNAME[domain_name]);
+            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpCNAME[domain_name])
             response.answer.append(rrset)
         elif qtype == "MX":
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpMX[domain_name]);
+            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpMX[domain_name])
             response.answer.append(rrset)
         else:
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpA[domain_name]);
+            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpA[domain_name])
             response.answer.append(rrset)
         print(f"DEBUG: Query for {domain_name} with type {qtype}")
 
