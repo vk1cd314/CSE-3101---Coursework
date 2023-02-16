@@ -1,3 +1,4 @@
+# import re
 import socket
 import dns.message
 
@@ -27,32 +28,42 @@ mpMX = {
     "cse.du.ac.bd." : "10 mail.cse.du.ac.bd."
 }
 
+def recurse(domain_name, qtype):
+    ret = []
+    if qtype == "A":
+        ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpA[domain_name]));
+        return ret
+    if qtype == "AAAA":
+        ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpAAAA[domain_name]));
+        return ret
+    if qtype == "MX":
+        ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpMX[domain_name]));
+        return ret
+    if qtype == "NS":
+        ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpNS[domain_name]));
+        retrec = recurse(mpNS[domain_name], "A")
+        for item in retrec:
+            ret.append(item)
+        return ret
+    if qtype == "CNAME":
+        ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpCNAME[domain_name]));
+        retrec = recurse(mpCNAME[domain_name], "NS")
+        for item in retrec:
+            ret.append(item)
+        return ret
+    return None
+
 def handle_request(data, client_address):
     request = dns.message.from_wire(data)
 
     response = dns.message.make_response(request)
     for item in request.question:
         domain_name, qtype = item.to_text().split(" IN ")
-        if qtype == "NS":
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpNS[domain_name]);
-            response.answer.append(rrset)
-            rrset = dns.rrset.from_text(mpNS[domain_name], 86400, dns.rdataclass.IN, "A", mpA[mpNS[domain_name]]);
-            response.answer.append(rrset)
-            rrset = dns.rrset.from_text(mpNS[domain_name], 86400, dns.rdataclass.IN, "AAAA", mpAAAA[mpNS[domain_name]]);
-            response.answer.append(rrset)
-        elif qtype == "AAAA":
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpAAAA[domain_name]);
-            response.answer.append(rrset)
-        elif qtype == "CNAME":
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpCNAME[domain_name]);
-            response.answer.append(rrset)
-        elif qtype == "MX":
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpMX[domain_name]);
-            response.answer.append(rrset)
-        else:
-            rrset = dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpA[domain_name]);
-            response.answer.append(rrset)
-        print(f"DEBUG: Query for {domain_name} with type {qtype}")
+        print(domain_name + " " + qtype)
+        ret = recurse(domain_name, qtype)
+        for item in ret:
+            print(item)
+            response.answer.append(item)
 
     return response.to_wire()
 

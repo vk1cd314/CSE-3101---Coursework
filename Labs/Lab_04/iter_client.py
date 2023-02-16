@@ -12,7 +12,6 @@ def iterative_resolve(domain, qtype):
         if authoritative_servers:
             server = "127.0.0.1"
             query = dns.message.make_query(authoritative_servers.pop(), "A")
-            # break
         else:
             server = "127.0.0.1"
 

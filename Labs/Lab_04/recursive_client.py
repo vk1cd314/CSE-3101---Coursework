@@ -15,4 +15,4 @@ def recursive_resolve(domain, qtype):
 
     return response
 
-print(recursive_resolve("cse.du.ac.bd.", dns.rdatatype.NS))
+print(recursive_resolve("www.cse.du.ac.bd.", dns.rdatatype.CNAME))
