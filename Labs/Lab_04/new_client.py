@@ -1,16 +1,18 @@
-import dnslib
-import socket
+import dns.message
+import dns.query
+import dns.resolver
+import dns.rdatatype
 
-def send_dns_query(domain_name):
-    query = dnslib.DNSRecord(q=dnslib.DNSQuestion(domain_name, qtype=1))
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_address = ('127.0.0.1', 5050)
-    client_socket.sendto(query.pack(), server_address)
-    data, _ = client_socket.recvfrom(4096)
-    response = dnslib.DNSRecord.parse(data)
+def dns_resolve(domain, qtype):
+    query = dns.message.make_query(domain, qtype)
+    response = None
+
+    server = "127.0.0.1"
+
+    print(f"DEBUG: Querying {server} for {domain} ({qtype})\n\n")
+    response = dns.query.udp(query, server, port=5050)
+    print(f"DEBUG: Got response: {response}\n\n")
+
     return response
 
-if __name__ == "__main__":
-    domain_name = "cs.du.ac.bd"
-    response = send_dns_query(domain_name)
-    print(response)
+print(dns_resolve("cse.du.ac.bd.", dns.rdatatype.A))
