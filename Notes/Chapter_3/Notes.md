@@ -112,6 +112,7 @@ Big leagues now boi, we can now handle channels with errors and loss. We achieve
    2. receiver must specify seq no. being of packet being **ACKed**
 
 The fsm for the receiver does not change, but for the sender there are new paths to follow for the timeout and new actions where we start and stop timers. 
+
 ![rdt3_sender](rdt3_sender.png "rdt3.0 sender fsm")
 
 ## Performance of Reliable Transfer Protocols
