@@ -134,3 +134,84 @@ But this requires more than 1-bit seq no. This is now implemented using the **GO
 
 ### GO-BACK-N 
 What we do here is use a cumulative **ACK** where as the **cumulative** implies we check all **ACKs** for the window at once.
+
+
+### Selective Repeat
+Alternative to **GO-BACK-N** where receiver individually **ACKS** all packets, thus we need more timers, window doesn't move forward until oldest packet is **ACKED**
+Selective Repeat could be bad since it might not recognize duplicates and not in-order delivery, so fix is seq_no. $\geq$ $2$ $\cdot$ window_size
+
+## TCP Lesgoooo
+
+[RFC 793](https://www.rfc-editor.org/rfc/rfc793)
+
+[RFC 1122](https://www.rfc-editor.org/rfc/rfc1122)
+
+[RFC 2018](https://www.rfc-editor.org/rfc/rfc2018)
+
+[RFC 5681](https://www.rfc-editor.org/rfc/rfc5681)
+
+[RFC 7323](https://www.rfc-editor.org/rfc/rfc7323)
+
+Check these out if you want more info.
+
+$MSS$ : maximum segment size
+
+1. point-to-point
+2. reliable, in-order byte stream
+3. full-duplex
+4. cumulative **ACKS**
+5. pipelined
+6. connection-oriented (Handshakes)
+7. flow-controlled
+
+![tcp_seg_format](tcp_seg_format.png "TCP Segment Format")
+
+ACK for a bytestream is just the sequence number + 1 in tcp
+    
+### Figuring out timeouts
+Need greater than **RTT** but **RTT** varies, fix how? Estimate RTT and change when needed
+
+We take the exponentially weighted moving average for the estimatedRTT, thus we have:
+
+$$EstimatedRTT = (1 - \alpha) \cdot EstimatedRTT + \alpha \cdot SampleRTT$$
+
+Here $\alpha$ is our weight and is usually around $0.125$
+
+But this is actually the timeout value, we need to add some sort of **safety margin**.
+
+Thus adding that term in we have:
+
+$$TimeoutInterval = EstimatedRTT + 4 \cdot DevRTT$$
+
+where **DevRTT** is the deviation of sorts, it is the exponentially weighted moving average of the deviation of **SampleRTT** from the **EstimatedRTT**.
+
+$$DevRTT = (1 - \beta) \cdot DevRTT + \beta \cdot |SampleRTT - EstimatedRTT|$$
+
+where $\beta = 0.25$ usually.
+
+Some events that are probably important for TCP:
+
+### Event : Data Received from App
+1. create segment with a seg no.
+2. seg no. is byte-stream number
+3. start timer if not already running
+
+### Event : timeout
+1. retransmit segment caused timeout
+2. restart timer
+
+### Event : ACK received
+1. ACK acknowledges previously unACKED segments? then update ACKed stuff and start timer if there are still unACKed segments
+
+This is stuff for the sender side, on the receiving side:
+
+### ACK Generation
+1. Arrival of in-order seg with expect seq no, all data upto expected seq no. already **ACKed** then $\Rightarrow$ Delayed **ACK**
+2. Arrival of in-order seg with expect seq no, one other seg has **ACK** pending $\Rightarrow$ immediately send out single Cumulative **ACK**
+3. Arrival of out-of-order seg with higher than expected seq no, i.e. a gap $\Rightarrow$ immediately send duplicate **ACK** indicating seq no of next expected byte
+4. arrival of segment that partially or completely fills gap $\Rightarrow$ immediately send **ACK** provided that segment starts at lower end of the gap
+
+### TCP fast retransmit
+Basically sends the same **ACK** multiple times when sender sees this it retransmits oldest **unACKed** segment once again
+
+There is also the idea of timeouts where we send all the packets in the window again instead of just 1.  
