@@ -23,7 +23,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('127.0.0.1', 8888)
 client_socket.connect(server_address)
 
-recv_buffer_size = 2
+recv_buffer_size = 12
 window_size = 4 * recv_buffer_size
 client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, recv_buffer_size)
 
@@ -36,9 +36,14 @@ data_len = len(data)
 timeout = 0.5  # in seconds
 start_time = time.time()
 
-while expected_ack_num < data_len:
-    send_size = min(window_size, data_len - expected_ack_num)
+# initialize receiver's advertised window to the sender's buffer size
+rwnd = window_size
 
+while expected_ack_num < data_len:
+    send_size = min(window_size, data_len - expected_ack_num, rwnd)
+
+    print(fromHeader(toHeader(seq_num, expected_ack_num, 1, 0, send_size)))
+    print(data[seq_num:seq_num + send_size])
     client_socket.sendall(toHeader(seq_num, expected_ack_num, 1, 0, send_size) + data[seq_num:seq_num + send_size])
     
     ack_header = client_socket.recv(12)
@@ -51,5 +56,9 @@ while expected_ack_num < data_len:
     if time.time() - start_time > timeout:
         seq_num = expected_ack_num
         start_time = time.time()
+
+    # update the window size based on the receiver's advertised window
+    print(window_size, rwnd)
+    window_size = min(rwnd, 4 * recv_buffer_size)
 
 client_socket.close()
