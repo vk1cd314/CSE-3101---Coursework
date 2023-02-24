@@ -16,6 +16,22 @@ def fromHeader(segment):
                     segment[9:10], byteorder="little"), int.from_bytes(
                         segment[10:12], byteorder="little")
 
+def update_cwnd(cwnd, ssthresh, acked, cwnd_max):
+    if cwnd < ssthresh:
+        # slow start
+        cwnd += acked
+    else:
+        # congestion avoidance
+        cwnd += (acked / cwnd)
+    if cwnd > cwnd_max:
+        cwnd = cwnd_max
+    return cwnd
+
+def slow_start(cwnd):
+    cwnd //= 2
+    if cwnd < 1:
+        cwnd = 1
+    return cwnd
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -26,12 +42,15 @@ server_socket.listen(1)
 
 client_socket, client_address = server_socket.accept()
 
-recv_buffer_size = 4
+recv_buffer_size = 12
 window_size = 4 * recv_buffer_size
 client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, recv_buffer_size)
 
 expected_seq_num = 0
 ack_num = 0
+cwnd = 1
+ssthresh = window_size
+cwnd_max = 64
 
 received_data = b''
 buffer = {}
@@ -42,28 +61,38 @@ while True:
         break
     seq_num, ack_numm, ack, sf, rwnd = fromHeader(header)
     print(fromHeader(header))
-
-    take = min(rwnd, recv_buffer_size)
-    extra = max(0, rwnd - recv_buffer_size)
-    print(extra)
-
+    
     if ack_numm in buffer:
-        buffer[ack_numm] += client_socket.recv(take)
+        buffer[ack_numm] += client_socket.recv(rwnd)
     else:
-        buffer[ack_numm] = client_socket.recv(take)
-
-    if extra != 0:
-        client_socket.recv(extra)
+        buffer[ack_numm] = client_socket.recv(rwnd)
         
     while expected_seq_num in buffer:
         data = buffer.pop(expected_seq_num)
         received_data += data
 
+        acked = len(data)
+        cwnd = update_cwnd(cwnd, ssthresh, acked, cwnd_max)
+
         ack_num += len(data)
         expected_seq_num += len(data)
 
-        to_send_ack = toHeader(expected_seq_num, ack_num, 1, 0, recv_buffer_size)
+        to_send_ack = toHeader(0, ack_num, 1, 0, 12)
         client_socket.sendall(to_send_ack)
+
+        if cwnd >= ssthresh:
+            # congestion avoidance
+            to_send_rwnd = min(window_size, int(cwnd))
+            to_send_sf = 0
+        else:
+            # slow start
+            to_send_rwnd = rwnd
+            to_send_sf = 1
+
+        to_send_header = toHeader(expected_seq_num, ack_num, 0, to_send_sf, to_send_rwnd)
+        print('yo what')
+        print(fromHeader(to_send_header))
+        client_socket.sendall(to_send_header)
 
     if not data:
         break

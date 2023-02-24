@@ -3,14 +3,13 @@ import socket
 import time 
 import random
 
-def toHeader(seqNum=0, ackNum=0, ack=0, sf=0, rwnd=0, chcksum = 0):
+def toHeader(seqNum=0, ackNum=0, ack=0, sf=0, rwnd=0):
     return seqNum.to_bytes(
         4, byteorder="little") + ackNum.to_bytes(
             4, byteorder="little") + ack.to_bytes(
                 1, byteorder="little") + sf.to_bytes(
                     1, byteorder="little") + rwnd.to_bytes(
-                        2, byteorder="little") + chcksum.to_bytes(
-                            2, byteorder="little")
+                        2, byteorder="little")
 
 def fromHeader(segment):
     return int.from_bytes(
@@ -18,23 +17,8 @@ def fromHeader(segment):
             segment[4:8], byteorder="little"), int.from_bytes(
                 segment[8:9], byteorder="little"), int.from_bytes(
                     segment[9:10], byteorder="little"), int.from_bytes(
-                        segment[10:12], byteorder="little"), int.from_bytes(
-                            segment[12:14], byteorder="little")
+                        segment[10:12], byteorder="little")
 
-def calculate_checksum(bytestream):
-    if len(bytestream) % 2 == 1:
-        bytestream += b'\x00'
-
-    checksum = 0
-
-    for i in range(0, len(bytestream), 2):
-        chunk = (bytestream[i] << 8) + bytestream[i+1]
-        checksum += chunk
-
-        if checksum > 0xffff:
-            checksum = (checksum & 0xffff) + 1
-
-    return ~checksum & 0xffff
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -54,23 +38,18 @@ expected_seq_num = 0
 ack_num = 0
 start_time = time.time()
 client_socket.settimeout(1)
-
+timeout = 1
 received_data = b''
 buffer_data = b''
 while True:
     try:
-        header = client_socket.recv(14)
-        seq_num, ack_num, ack, sf, rwnd, chcksum = fromHeader(header)
-        if not header:
-            break
-        print(fromHeader(header))
-        
+        header = client_socket.recv(12)
+        seq_num, ack_num, ack, sf, rwnd = fromHeader(header)
+    
         data = client_socket.recv(mss)
-        if calculate_checksum(data) != chcksum:
-            continue
     except:
-        rwind = recv_buffer_size - (len(buffer_data)+mss - 1) // mss
-        to_send_ack = toHeader(expected_seq_num, ack_num, 1, 0, rwind, 0)
+        rwind = recv_buffer_size - (len(buffer_data)+mss - 1)//mss
+        to_send_ack = toHeader(expected_seq_num, ack_num, 1, 0, rwind)
         client_socket.sendall(to_send_ack)
         start_time = time.time()
         continue
@@ -85,8 +64,8 @@ while True:
         buffer_data += data
         ack_num += len(data)
         expected_seq_num += len(data)
-        to_send_ack = toHeader(seq_num, ack_num, 1, 0, 8, 0)
-        if len(buffer_data) >= recv_buffer_size:
+        to_send_ack = toHeader(seq_num, ack_num, 1, 0, 8)
+        if(len(buffer_data)>=recv_buffer_size):
             received_data += buffer_data
             buffer_data = b''
             try:
@@ -95,7 +74,7 @@ while True:
             except:
                 print("client closed")
     else:
-        to_send_ack = toHeader(expected_seq_num, expected_seq_num, 1, 0, 0, 0)
+        to_send_ack = toHeader(expected_seq_num, expected_seq_num, 1, 0, 0)
         client_socket.sendall(to_send_ack)
         client_socket.sendall(to_send_ack)
         client_socket.sendall(to_send_ack)

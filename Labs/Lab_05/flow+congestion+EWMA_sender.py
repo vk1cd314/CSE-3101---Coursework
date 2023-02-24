@@ -2,14 +2,13 @@
 import socket
 import time
 
-def toHeader(seqNum=0, ackNum=0, ack=0, sf=0, rwnd=0, chcksum = 0):
+def toHeader(seqNum=0, ackNum=0, ack=0, sf=0, rwnd=0):
     return seqNum.to_bytes(
         4, byteorder="little") + ackNum.to_bytes(
             4, byteorder="little") + ack.to_bytes(
                 1, byteorder="little") + sf.to_bytes(
                     1, byteorder="little") + rwnd.to_bytes(
-                        2, byteorder="little") + chcksum.to_bytes(
-                            2, byteorder="little")
+                        2, byteorder="little")
 
 def fromHeader(segment):
     return int.from_bytes(
@@ -17,23 +16,8 @@ def fromHeader(segment):
             segment[4:8], byteorder="little"), int.from_bytes(
                 segment[8:9], byteorder="little"), int.from_bytes(
                     segment[9:10], byteorder="little"), int.from_bytes(
-                        segment[10:12], byteorder="little"), int.from_bytes(
-                            segment[12:14], byteorder="little")
+                        segment[10:12], byteorder="little")
 
-def calculate_checksum(bytestream):
-    if len(bytestream) % 2 == 1:
-        bytestream += b'\x00'
-
-    checksum = 0
-
-    for i in range(0, len(bytestream), 2):
-        chunk = (bytestream[i] << 8) + bytestream[i+1]
-        checksum += chunk
-
-        if checksum > 0xffff:
-            checksum = (checksum & 0xffff) + 1
-
-    return ~checksum & 0xffff
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -68,11 +52,9 @@ dev_rtt = 0.5
 while seq_num < data_len:
     curr_sent_size = 0
     while curr_sent_size < window_size and seq_num < data_len:
-        send_size = min(mss, data_len-seq_num)
-        client_socket.sendall(toHeader(seq_num, seq_num, 0, 0, 0, 
-                calculate_checksum(data[seq_num:seq_num+send_size])) + data[seq_num:seq_num+send_size])
-        # print(fromHeader(toHeader(seq_num, seq_num, 0, 0, 0, 0)))
-        # print(data[seq_num:seq_num+send_size], calculate_checksum(data[seq_num:seq_num+send_size]))
+        send_size = min(mss, data_len - seq_num)
+        client_socket.sendall(toHeader(seq_num, seq_num, 0, 0, 0) + data[seq_num:seq_num+send_size])
+        print(data[seq_num:seq_num+send_size])
         curr_sent_size += send_size 
         sent_size += send_size
         seq_num += send_size
@@ -85,8 +67,8 @@ while seq_num < data_len:
     timeout = estimated_rtt + 4 * dev_rtt
     
     expected_ack_num = seq_num
-    ack_pkt = client_socket.recv(14)
-    seqNum, ack_num, ack, sf, rwnd, chcksum = fromHeader(ack_pkt)
+    ack_pkt = client_socket.recv(12)
+    seqNum, ack_num, ack, sf, rwnd = fromHeader(ack_pkt)
 
     window_size = min(cwnd, 2 * recv_buffer_size, rwnd)
 
@@ -100,7 +82,7 @@ while seq_num < data_len:
         cwnd += mss
         if cwnd >= ssthresh:
             cwnd += mss * mss // cwnd
-    
+
     if dup_ack == 3:
         dup_ack = 0
         ssthresh = cwnd // 2
