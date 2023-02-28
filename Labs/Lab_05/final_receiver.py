@@ -63,8 +63,7 @@ while True:
         seq_num, ack_num, ack, sf, rwnd, chcksum = fromHeader(header)
         if not header:
             break
-        print(fromHeader(header))
-        
+
         data = client_socket.recv(mss)
         if calculate_checksum(data) != chcksum:
             continue
@@ -76,26 +75,27 @@ while True:
         continue
 
     if not data:
-        print("no data")
+        print("no data fin")
         break
     
     seq_num = ack_num
     
-    if seq_num == expected_seq_num and random.randint(0, 2) != 0:
+    if seq_num == expected_seq_num and random.randint(0, 9) > 0:
         buffer_data += data
         ack_num += len(data)
         expected_seq_num += len(data)
-        to_send_ack = toHeader(seq_num, ack_num, 1, 0, 8, 0)
+        to_send_ack = toHeader(seq_num, ack_num, 1, 0, recv_buffer_size, 0)
         if len(buffer_data) >= recv_buffer_size:
             received_data += buffer_data
             buffer_data = b''
             try:
-                print("full buffer")
+                print("Full Buffer, emptying")
                 client_socket.sendall(to_send_ack)
             except:
-                print("client closed")
+                print("Client Closed")
     else:
-        to_send_ack = toHeader(expected_seq_num, expected_seq_num, 1, 0, 0, 0)
+        print("Packet Dropped")
+        to_send_ack = toHeader(expected_seq_num, expected_seq_num, 1, 1, 0, 0)
         client_socket.sendall(to_send_ack)
         client_socket.sendall(to_send_ack)
         client_socket.sendall(to_send_ack)

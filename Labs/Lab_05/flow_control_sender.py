@@ -24,9 +24,10 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('127.0.0.1', 8888)
 client_socket.connect(server_address)
 
+header_length = 12
 recv_buffer_size = 4
-window_size = 2 * recv_buffer_size
 mss = 8
+window_size = mss
 client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, recv_buffer_size)
 
 seq_num = 0
@@ -35,7 +36,7 @@ expected_ack_num = 0
 data = b'This is a sample message to test the flow control algorithm, it just needs to be long enough to test the flow control algorithm.'
 data_len = len(data)
 
-timeout = 2  # in seconds
+timeout = 2  
 start_time = time.time()
 rwnd = 50
 sent_size = 0
@@ -45,53 +46,27 @@ last_ack = 0
 while seq_num < data_len:
     curr_sent_size = 0
     while curr_sent_size < window_size and seq_num < data_len:
-        send_size = min(mss, data_len-seq_num)
+        send_size = min(mss, data_len - seq_num)
         client_socket.sendall(toHeader(seq_num, seq_num, 0, 0, 0) + data[seq_num:seq_num+send_size])
-        print(data[seq_num:seq_num+send_size])
         curr_sent_size += send_size 
         sent_size += send_size
         seq_num += send_size
 
     expected_ack_num = seq_num
-    ack_pkt = client_socket.recv(12)
+    ack_pkt = client_socket.recv(header_length)
     seqNum, ack_num, ack, sf, rwnd = fromHeader(ack_pkt)
 
     window_size = min(2 * recv_buffer_size, rwnd)
 
-    print(ack_num, last_ack, dup_ack)
     if ack_num == last_ack:
         dup_ack += 1
     else:
         dup_ack = 0
     if dup_ack == 3:
+        print("Received Triple Duplicate Acknowledgement go back to last_ack")
         dup_ack = 0
         seq_num = last_ack
-    print(ack_num, last_ack, dup_ack)
-    # if ack_num != expected_ack_num:
-    #     print("ERROR: Received incorrect ACK number. Expected", expected_ack_num, "but received", ack_num)
-    #     break
 
     last_ack = ack_num
-    # if ack_num == expected_ack_num:
-    #     expected_ack_num += recv_buffer_size
-    #     window_size = min(2*recv_buffer_size, rwnd)
-    # else:
-    #     seq_num = expected_ack_num
-        # continue
- 
-    # while rwnd == 0:
-    #     print("rwnd 0")
-    #     seq_num = ack_num
-    #     client_socket.sendall(toHeader(seq_num, ack_num, 0, 0, 8)  + data[seq_num:seq_num+send_size])
-    #     ack_pkt = client_socket.recv(12)
-    #     seqNum, ack_num, ack, sf, rwnd = fromHeader(ack_pkt[:12])
-    #     print("rwnd 0")
-    #     print(seq_num, ack_num, ack, sf, rwnd)
-    # if time.time() - start_time > timeout:
-    #     seq_num = expected_ack_num
-    #     print("timeout")
-    #     start_time = time.time()
-    
-
 
 client_socket.close()
