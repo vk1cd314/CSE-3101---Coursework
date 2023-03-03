@@ -215,3 +215,58 @@ This is stuff for the sender side, on the receiving side:
 Basically sends the same **ACK** multiple times when sender sees this it retransmits oldest **unACKed** segment once again
 
 There is also the idea of timeouts where we send all the packets in the window again instead of just 1.  
+
+## TCP Congestion Control
+
+### AIMD (additive-increase/multiplicative-decrease)
+1. Additive Increase $\Rightarrow$ Increases by 1 MSS
+2. Multiplicative Decrease $\Rightarrow$ Decreases by half
+   1. For TCP tahoe it cuts to 1 MSS
+   2. Halfed for TCP Reno
+
+The congestion window is dynamically adjusted to fit, in response to the observed network congestion.
+
+TCP sending behaviour:
+* **roughly**: send cwnd bytes of data and wait RTT for ACKS then:
+   $$TCP\ rate = \frac{cwnd}{RTT}\ \ bytes/second$$
+
+### TCP Slow start
+* When connection begins increase rate exponentially until the first loss event
+  * Initially $cwnd = 1\ MSS$
+  * double $cwnd$ every RTT
+  * done by incrementing cwnd for every ACK received
+
+### ssthresh
+Slow start threshold, on loss event it gets set to $\frac{1}{2}cwnd$.
+
+![tcp_congestion_control](tcp_congestion_control.png "TCP Congestion Control")
+
+The finite state machine for TCP congestion control is as below:
+![tcp_congestion_fsm](tcp_congestion_fsm.png "TCP Congestion FSM")
+
+## TCP Cubic
+* The main idea here is that after loss the congestion window shouldn't have changed all that much
+* Therefore we can quickly increase till we get close to the congestion window and then slow down the increase to even it out.
+* This enables a higher throughput on average than with AIMD
+
+![cubic](cubic_vs_classic.png "TCP Cubic vs classic")
+
+Steps for the cubic algorithm:
+* K: Point in time when TCP window size will reach $W_{max}$, K itself is tuneable
+* increase W as a function of the cube of its distance between the current time and K 
+  * larger increases when further away from K
+  * smaller increases (catious) when nearer K
+
+### Delay Based Approach
+* $RTT_{min}$ is the minimum observed throughput 
+* Measured Throughput is $\frac{bytes\ sent\ in\ last\ RTT\ interval}{RTT_{measured}}$
+* The uncongested throughput is therefore $\frac{cwnd}{RTT_{min}}$
+* If the measured throughput very close to uncongested throughput
+  * Increase cwnd linearly
+* else measured throughput far below uncongested throughput
+  * Decrease cwnd linearly
+
+Recent version of TCP called BBR (Bottleneck-Bandwidth-RTT) used in google's internal backbone network.
+
+### Explicit congestion notification
+Eishob baal nai
