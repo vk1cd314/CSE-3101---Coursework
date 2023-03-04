@@ -122,4 +122,82 @@ Think of buffer as queue.
 * **Weighted fair queueing**: form of round robin, it differs from round-robin in that it can be give different classes different weights depending on the time
 
 
+## IP datagram
 
+![ip_datagram](ip_datagram.png "IP datagram")
+
+* **IP address:** 32 bit identifier associated with each host or router interface
+
+### Subnets
+* Devices that are directly connected to each other
+* Ip network made up of multiple subnets
+* Subnet mask provides how many same mask values they will have in the ip address
+
+![subnets](subnets.png "Subnets")
+
+### CIDR (Classless InterDomain Routing)
+* Subnet portion of address of arbitrary length
+* address format: a.b.c.d/x where x is the # of bits in the subnet portion of address, last d ommitted if 0
+
+### DHCP (Dynamic Host Configuration Protocol)
+Dynamically get address from a server, is plug and play.
+
+Host will dynimcally obtains IP address from network server when it "joins" the network
+* can renew its lease on address in use
+* allows reuse of address (only hold address while connected/on)
+* support for mobile users who join/leave network
+
+**OVERVIEW**
+* Host broadcasts **DHCP discover** msg
+* DHCP server responds with **DHCP offer** msg
+* host requests IP address: **DHCP request**
+* DHCP server sends address: **DHCP ack** msg
+
+DHCP server co-located inside router usually.
+
+![dhcp](dhcp.png "How DHCP works?")
+
+DHCP also returns more info than an IP, which are as follows:
+* Address of first-hop router for client
+* name and IP address of DNS server
+* network mask
+
+**ICANN** world boss right here.
+
+### NAT (Network Address Translation)
+Everyone uses same IP address for connection to the internet, but will be differentiated by local ips.
+
+* All devices in local network have 32-bit addressesin a "private" IP address space (10/8, 172.16/12, 192.168/16 prefixes) that can only be used in local network
+
+Advantages:
+* Just one IP address needed from provider ISP for all devies
+* can change address of host in local netwrok without notifying outside world
+* can change ISP without changing address of devies in local network
+* security: device inside local net not direcly addressable, visible to the outside world
+
+### Implementation of NAT
+* Outgoing datagrams: replace(source IP, port #) of every outgoing datagram to (NAT IP addr, net port #)
+* remember every translation pair
+* incoming datagrams: replace like with outgoing but opposite
+
+But NAT controversial 
+* routers "should" only process upto layer 3
+* address "shortage" should be solved IPv6
+* violates end-end argument
+* NAT traversal, what if client wants to connect to server behind NAT
+
+## IPv6
+* FIXED LENGTH HEADER OMG
+* Speed more
+* enable different network-layer flows
+
+![ipv6](ipv6_datagram.png "IPv6 Datagram")
+
+### How to transition?
+We want them to coexist really. Fix? Tunneling
+
+**tunneling**: IPv6 Datagram carried as payload in IPv4 datagram among IPv4 routers
+
+![tunneling](tunneling.png "Tunneling")
+
+![how_tunnel](howtunnel.png "How Tunneling")
