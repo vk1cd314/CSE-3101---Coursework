@@ -1,7 +1,6 @@
 import socket
 import tqdm
 import os
-import pickle
 
 SERVER_HOST = ""
 SERVER_PORT = 5002

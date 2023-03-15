@@ -242,6 +242,7 @@ Slow start threshold, on loss event it gets set to $\frac{1}{2}cwnd$.
 ![tcp_congestion_control](tcp_congestion_control.png "TCP Congestion Control")
 
 The finite state machine for TCP congestion control is as below:
+
 ![tcp_congestion_fsm](tcp_congestion_fsm.png "TCP Congestion FSM")
 
 ## TCP Cubic

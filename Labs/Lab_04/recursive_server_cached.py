@@ -31,33 +31,34 @@ mapCache = {}
 
 def recurse(domain_name, qtype):
     print(f"DEBUG: Query for {domain_name} with type {qtype}")
-    if [domain_name, qtype] in mapCache.keys():
-        return mapCache[[domain_name, qtype]]
+    if (domain_name, qtype) in mapCache.keys():
+        return mapCache[(domain_name, qtype)]
     ret = []
     if qtype == "A":
         ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpA[domain_name]))
-        mapCache[[domain_name, qtype]] = ret
+        mapCache[(domain_name, qtype)] = ret
         return ret
     if qtype == "AAAA":
         ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpAAAA[domain_name]))
-        mapCache[[domain_name, qtype]] = ret
+        mapCache[(domain_name, qtype)] = ret
         return ret
     if qtype == "MX":
         ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpMX[domain_name]))
+        mapCache[(domain_name, qtype)] = ret
         return ret
     if qtype == "NS":
         ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpNS[domain_name]))
         retrec = recurse(mpNS[domain_name], "A")
         for item in retrec:
             ret.append(item)
-        mapCache[[domain_name, qtype]] = ret
+        mapCache[(domain_name, qtype)] = ret
         return ret
     if qtype == "CNAME":
         ret.append(dns.rrset.from_text(domain_name, 86400, dns.rdataclass.IN, qtype, mpCNAME[domain_name]))
         retrec = recurse(mpCNAME[domain_name], "NS")
         for item in retrec:
             ret.append(item)
-        mapCache[[domain_name, qtype]] = ret
+        mapCache[(domain_name, qtype)] = ret
         return ret
     return None
 

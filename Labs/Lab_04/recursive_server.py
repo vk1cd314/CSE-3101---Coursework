@@ -28,7 +28,7 @@ mpMX = {
     "cse.du.ac.bd." : "10 mail.cse.du.ac.bd."
 }
 
-def recurse(domain_name, qtype):
+def recurse(domain_name, qtype): 
     print(f"DEBUG: Query for {domain_name} with type {qtype}")
     ret = []
     if qtype == "A":

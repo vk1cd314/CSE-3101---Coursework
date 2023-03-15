@@ -85,6 +85,7 @@ Lots of parallelism here too.
 * If switch fabric slower than input ports combined $\Rightarrow$ queueing may occur at input queues 
   * Queuing delay and loss due to input buffer overflow
 * **Head-of-the-Line (HOL)** blocking: queued datagram at front of queue prevents others in queue from moving forward
+
 ![HOL](HOL_blocking.png "HOl_blocking")
 
 
@@ -201,3 +202,6 @@ We want them to coexist really. Fix? Tunneling
 ![tunneling](tunneling.png "Tunneling")
 
 ![how_tunnel](howtunnel.png "How Tunneling")
+
+
+## Generalized Forwarding

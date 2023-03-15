@@ -42,7 +42,9 @@ def iterative_resolve(domain, qtype):
             print(f"DEBUG: Querying {server} for {domain} ({qtype})\n\n")
         else:
             print(f"DEBUG: Querying {server} for {domain} ({qtype})\n\n")
+            
         response = dns.query.udp(query, server, port=5050)
+        
         print(f"DEBUG: Got response: {response}\n\n")
 
         if response.rcode() == dns.rcode.NOERROR:
