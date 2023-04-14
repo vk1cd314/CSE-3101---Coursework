@@ -6,27 +6,23 @@ import random
 
 CNGTIME = 15
 
-ME = 5001
+ME = 6001
 
 forwardingTable = {
         # graph ta dekhtesi pore ;-;
-        # 5002 : 5002,
-        # 5003 : 5002
+        
         }
 
 ganjaTableKaronPrefix = {
 
 }
 ASpaths = {
-    # 5002 : "1",
-    # 5003 : "1"
 }
-eLinks = [6001]
+eLinks = [7001]
 iLinks = []
-# iLinks = [5002, 5003]
 
-ADPREF = 5000
-ASN = 1
+ADPREF = 6000
+ASN = 2
 
 
 def query(dest):
@@ -112,8 +108,7 @@ def recvt():
 recThread = threading.Thread(target=recvt, args=())
 recThread.start()
 time.sleep(5)
-send("eBGP", 5000, str(ASN), eLinks)
-
+send("eBGP", 6000, str(ASN), eLinks)
 
 
 
