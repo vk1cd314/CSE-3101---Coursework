@@ -8,6 +8,13 @@ CNGTIME = 15
 
 ME = 7003
 
+localPrefTable = {
+    1 : 100,
+    2 : 100,
+    3 : 100,
+    4 : 100
+}
+
 forwardingTable = {
         # graph ta dekhtesi pore ;-;
         }
@@ -18,7 +25,7 @@ ganjaTableKaronPrefix = {
 ASpaths = {
 }
 eLinks = []
-iLinks = [7001, 7004]
+iLinks = [7001, 7002, 7004]
 
 ADPREF = 7000
 ASN = 3
@@ -49,22 +56,48 @@ def send(origin, dest, path, link_list):
             print("client conn refused")
             client.close()
 
+
+def sendPref(dest, path, localPref):
+    brk = "\n"
+    next_hop = str(ME)
+    to_send = str(dest) + brk + "iBGP" + brk + path + brk + next_hop + brk + str(localPref)
+    for u in iLinks:
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            client.connect(('127.0.0.1',int(u)))
+            client.send(to_send.encode())
+            client.close()
+        except:
+            print("client conn refused")
+            client.close()
+
 def update(dest, path, localpref, nexthop):
     ganjaTableKaronPrefix[dest] = (nexthop, localpref)
     ASpaths[dest] = path
 
 
 def handleBGP(msg):
+    hasPref = False
     origin = msg[1]
     dest = msg[0]
     path = msg[2]
     nexthop = msg[3]
     localpref = 100
-    print(origin, dest, path, nexthop, localpref)
+    if msg[1] != "iBGP":
+        src = int(msg[2][0])
+        if src in localPrefTable.keys():
+            if localPrefTable[src] != 100:
+                localpref = localPrefTable[src]
+                hasPref = True
     if len(msg) >= 5:
-        localpref = msg[4]
+        localpref = int(msg[4])
+        hasPref = True
+    print(f"Destination: {dest}\nOrigin: {origin}\nASpath: {path}\nNextHop: {nexthop}\nlocalPreference: {localpref}\n")
     if dest in ganjaTableKaronPrefix.keys():
-        if ganjaTableKaronPrefix[dest][1] < localpref:
+        if ASpaths[dest] == path:
+            return
+        print(ganjaTableKaronPrefix)
+        if int(ganjaTableKaronPrefix[dest][1]) < localpref:
             update(dest, path, localpref, nexthop)
         if len(ASpaths[dest]) > len(path):
             update(dest, path, localpref, nexthop)
@@ -75,18 +108,21 @@ def handleBGP(msg):
     print(ganjaTableKaronPrefix)
     if origin == "eBGP":
         if len(iLinks):
-            print("sending ebgp info to ibgp")
-            send("iBGP", dest, path, iLinks)
+            print("sending ebgp info to iLinks")
+            if hasPref:
+                sendPref(dest, path,  localpref)
+            else:
+                send("iBGP", dest, path, iLinks)
         if len(eLinks):
-            print("sending external ebgp to ebgp")
+            print("sending ebgp to other eLinks")
             send("eBGP", dest, str(ASN)+" "+path, eLinks)
 
     else :
         if len(eLinks):
-            print("sending ebgp cause it is ibgp")
+            print("sending to eLinks cause it is ibgp")
             send("eBGP", dest, str(ASN)+" "+path, eLinks)
-    
-            
+       
+ 
 
 def receive(conn, addr):
     data = conn.recv(1024).decode()
@@ -94,7 +130,6 @@ def receive(conn, addr):
     if str(ASN) in msg[2]:
         return 
     handleBGP(msg)
-
 
 
 def recvt():
