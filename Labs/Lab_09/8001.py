@@ -6,7 +6,7 @@ import random
 
 CNGTIME = 15
 
-ME = 6001
+ME = 8001
 
 forwardingTable = {
         # graph ta dekhtesi pore ;-;
@@ -18,11 +18,11 @@ ganjaTableKaronPrefix = {
 }
 ASpaths = {
 }
-eLinks = [5001]
-iLinks = [6002]
+eLinks = [7004]
+iLinks = []
 
-ADPREF = 6000
-ASN = 2
+ADPREF = 8000
+ASN = 4
 
 
 def query(dest):
@@ -86,6 +86,7 @@ def handleBGP(msg):
         if len(eLinks):
             print("sending ebgp cause it is ibgp")
             send("eBGP", dest, str(ASN)+" "+path, eLinks)
+    
     
             
 

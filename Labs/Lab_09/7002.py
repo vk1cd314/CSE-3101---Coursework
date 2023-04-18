@@ -6,11 +6,10 @@ import random
 
 CNGTIME = 15
 
-ME = 6001
+ME = 7002
 
 forwardingTable = {
         # graph ta dekhtesi pore ;-;
-        
         }
 
 ganjaTableKaronPrefix = {
@@ -18,11 +17,11 @@ ganjaTableKaronPrefix = {
 }
 ASpaths = {
 }
-eLinks = [5001]
-iLinks = [6002]
+eLinks = []
+iLinks = [7001]
 
-ADPREF = 6000
-ASN = 2
+ADPREF = 7000
+ASN = 3
 
 
 def query(dest):
@@ -92,7 +91,6 @@ def handleBGP(msg):
 def receive(conn, addr):
     data = conn.recv(1024).decode()
     msg = data.splitlines()
-
     if str(ASN) in msg[2]:
         return 
     handleBGP(msg)

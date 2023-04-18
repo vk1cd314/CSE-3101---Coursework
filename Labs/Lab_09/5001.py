@@ -18,12 +18,13 @@ ganjaTableKaronPrefix = {
 
 }
 ASpaths = {
+    5000 : "1"
     # 5002 : "1",
     # 5003 : "1"
 }
-eLinks = [6001]
+eLinks = [6001, 7001]
 iLinks = []
-# iLinks = [5002, 5003]
+
 
 ADPREF = 5000
 ASN = 1
@@ -31,10 +32,11 @@ ASN = 1
 
 def query(dest):
     dest_pref = (dest//1000) * 1000
+    print(dest_pref)
     if dest_pref == ADPREF:
-        print(f"in the same AS, nexthop = {forwardingTable[dest]}\n")
-    if dest_pref in ASpaths.keys():
-        print(f"In a connected AS, path to which is = {ASpaths[dest]}\n")
+        print(f"in the same AS, nexthop = {forwardingTable[dest_pref]}\n")
+    if str(dest_pref) in ASpaths.keys():
+        print(f"In a connected AS, path to which is = {ASpaths[str(dest_pref)]}\n")
     else :
         print("host is unreachable\n")
 
@@ -76,16 +78,20 @@ def handleBGP(msg):
     else :
         ganjaTableKaronPrefix[dest] = (nexthop, localpref)
         ASpaths[dest] = path
+    print(ASpaths)
+    print(ganjaTableKaronPrefix)
     if origin == "eBGP":
         if len(iLinks):
+            print("sending ebgp info to ibgp")
             send("iBGP", dest, path, iLinks)
+        if len(eLinks):
+            print("sending external ebgp to ebgp")
+            send("eBGP", dest, str(ASN)+" "+path, eLinks)
 
     else :
         if len(eLinks):
+            print("sending ebgp cause it is ibgp")
             send("eBGP", dest, str(ASN)+" "+path, eLinks)
-    print(ASpaths)
-    print(ganjaTableKaronPrefix)
-    
             
 
 def receive(conn, addr):
@@ -112,8 +118,10 @@ def recvt():
 recThread = threading.Thread(target=recvt, args=())
 recThread.start()
 time.sleep(5)
-send("eBGP", 5000, str(ASN), eLinks)
-
+send("eBGP", ADPREF, str(ASN), eLinks)
+time.sleep(3)
+balls = input("->")
+query(int(balls))
 
 
 

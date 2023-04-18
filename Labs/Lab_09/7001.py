@@ -17,8 +17,8 @@ ganjaTableKaronPrefix = {
 }
 ASpaths = {
 }
-eLinks = [6001]
-iLinks = []
+eLinks = [5001]
+iLinks = [7003, 7002]
 
 ADPREF = 7000
 ASN = 3
@@ -71,15 +71,20 @@ def handleBGP(msg):
     else :
         ganjaTableKaronPrefix[dest] = (nexthop, localpref)
         ASpaths[dest] = path
+    print(ASpaths)
+    print(ganjaTableKaronPrefix)
     if origin == "eBGP":
         if len(iLinks):
+            print("sending ebgp info to ibgp")
             send("iBGP", dest, path, iLinks)
+        if len(eLinks):
+            print("sending external ebgp to ebgp")
+            send("eBGP", dest, str(ASN)+" "+path, eLinks)
 
     else :
         if len(eLinks):
+            print("sending ebgp cause it is ibgp")
             send("eBGP", dest, str(ASN)+" "+path, eLinks)
-    print(ASpaths)
-    print(ganjaTableKaronPrefix)
     
             
 
@@ -106,7 +111,7 @@ def recvt():
 recThread = threading.Thread(target=recvt, args=())
 recThread.start()
 time.sleep(5)
-send("eBGP", 7000, str(ASN), eLinks)
+send("eBGP", ADPREF, str(ASN), eLinks)
 
 
 

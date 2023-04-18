@@ -6,7 +6,7 @@ import random
 
 CNGTIME = 15
 
-ME = 6001
+ME = 6002
 
 forwardingTable = {
         # graph ta dekhtesi pore ;-;
@@ -18,8 +18,8 @@ ganjaTableKaronPrefix = {
 }
 ASpaths = {
 }
-eLinks = [5001]
-iLinks = [6002]
+eLinks = [7004]
+iLinks = [6001]
 
 ADPREF = 6000
 ASN = 2
