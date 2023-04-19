@@ -21,7 +21,7 @@ forwardingTable = {
         # 5003 : 5002
         }
 
-ganjaTableKaronPrefix = {
+prefixTable = {
 
 }
 ASpaths = {
@@ -78,7 +78,7 @@ def sendPref(dest, path, localPref):
             client.close()
 
 def update(dest, path, localpref, nexthop):
-    ganjaTableKaronPrefix[dest] = (nexthop, localpref)
+    prefixTable[dest] = (nexthop, localpref)
     ASpaths[dest] = path
 
 
@@ -99,19 +99,19 @@ def handleBGP(msg):
         localpref = int(msg[4])
         hasPref = True
     print(f"Destination: {dest}\nOrigin: {origin}\nASpath: {path}\nNextHop: {nexthop}\nlocalPreference: {localpref}\n")
-    if dest in ganjaTableKaronPrefix.keys():
+    if dest in prefixTable.keys():
         if ASpaths[dest] == path:
             return
-        print(ganjaTableKaronPrefix)
-        if int(ganjaTableKaronPrefix[dest][1]) < localpref:
+        print(prefixTable)
+        if int(prefixTable[dest][1]) < localpref:
             update(dest, path, localpref, nexthop)
-        if len(ASpaths[dest]) > len(path):
+        elif len(ASpaths[dest]) > len(path):
             update(dest, path, localpref, nexthop)
     else :
-        ganjaTableKaronPrefix[dest] = (nexthop, localpref)
+        prefixTable[dest] = (nexthop, localpref)
         ASpaths[dest] = path
     print(ASpaths)
-    print(ganjaTableKaronPrefix)
+    print(prefixTable)
     if origin == "eBGP":
         if len(iLinks):
             print("sending ebgp info to iLinks")
