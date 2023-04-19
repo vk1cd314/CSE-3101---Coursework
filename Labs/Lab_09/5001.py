@@ -155,8 +155,8 @@ recThread.start()
 time.sleep(5)
 send("eBGP", ADPREF, str(ASN), eLinks)
 time.sleep(3)
-balls = input("->")
-query(int(balls))
+inp = input("->")
+query(int(inp))
 
 
 

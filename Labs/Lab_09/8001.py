@@ -150,7 +150,9 @@ recThread = threading.Thread(target=recvt, args=())
 recThread.start()
 time.sleep(5)
 send("eBGP", ADPREF, str(ASN), eLinks)
-
+time.sleep(3)
+inp = input("->")
+query(int(inp))
 
 
         
