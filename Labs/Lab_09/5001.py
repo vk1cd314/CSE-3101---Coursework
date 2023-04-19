@@ -16,9 +16,7 @@ localPrefTable = {
 }
 
 forwardingTable = {
-        # graph ta dekhtesi pore ;-;
-        # 5002 : 5002,
-        # 5003 : 5002
+        
         }
 
 prefixTable = {
@@ -38,14 +36,21 @@ ASN = 1
 
 
 def query(dest):
+    if int(dest) == ME:
+        print("itself")
+        return
     dest_pref = (dest//1000) * 1000
-    print(dest_pref)
     if dest_pref == ADPREF:
-        print(f"in the same AS, nexthop = {forwardingTable[dest_pref]}\n")
+        if int(dest) in forwardingTable.keys():
+            print(f"in the same AS, nexthop = {forwardingTable[dest]}\n")
+        else : 
+            print("Prefix in same AS but host does not exist")
+    # print(dest_pref, ASpaths.keys())
     if str(dest_pref) in ASpaths.keys():
         print(f"In a connected AS, path to which is = {ASpaths[str(dest_pref)]}\n")
     else :
         print("host is unreachable\n")
+
 
 
     
@@ -155,8 +160,10 @@ recThread.start()
 time.sleep(5)
 send("eBGP", ADPREF, str(ASN), eLinks)
 time.sleep(3)
-inp = input("->")
-query(int(inp))
+print(f"server at {ME}")
+while True:
+    inp = input("->")
+    query(int(inp))
 
 
 
