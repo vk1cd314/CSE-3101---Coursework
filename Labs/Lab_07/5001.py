@@ -4,6 +4,7 @@ import threading
 import time
 import random
 
+ERR = False
 CNGTIME = 15
 
 ME = 5001
@@ -19,7 +20,7 @@ dist = {}
 def dijkstra():
     pq = PriorityQueue()
     dist.clear()
-    for i in range(5000, 5004):
+    for i in range(5001, 5006):
         dist[i] = 100000
     dist[ME] = 0
     pq.put((dist[ME], ME))
@@ -137,14 +138,15 @@ startTim = time.time()
 
 while True:
     currTim = time.time()
-    if (currTim - startTim > CNGTIME):
-        rankey = random.randint(5001, 5005)
-        ranWt = random.randint(10, 100)
-        startTim = time.time()
-        for (u, v) in graph[ME]:
-            if u == rankey:
-                graph[ME][graph[ME].index((u, v))] = (u, ranWt)
-                graph[u][graph[u].index((ME, v))] = (ME, ranWt)
+    if ERR:
+        if (currTim - startTim > CNGTIME):
+            rankey = random.randint(5001, 5005)
+            ranWt = random.randint(10, 100)
+            startTim = time.time()
+            for (u, v) in graph[ME]:
+                if u == rankey:
+                    graph[ME][graph[ME].index((u, v))] = (u, ranWt)
+                    graph[u][graph[u].index((ME, v))] = (ME, ranWt)
         
 
 

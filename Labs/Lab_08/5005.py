@@ -4,6 +4,7 @@ import threading
 import time
 import random
 
+ERR = False
 INF = 100000
 CNGTIME = 15
 
@@ -51,8 +52,7 @@ def update_distance_vector(new_dist):
             if dist_all[i][ME] == INF:
                 dist_all[i][sender] = INF
     
-    if old != dist_all[sender]:
-        bellman_ford()
+    bellman_ford()
 
 def send():
     print('Sending')
@@ -112,11 +112,12 @@ startTim = time.time()
 
 while True:
     currTim = time.time()
-    if (currTim - startTim > CNGTIME):
-        rankey = random.randint(5001, 5005)
-        ranWt = random.randint(1, 9)
-        startTim = time.time()
-        if rankey not in broken_links and cost[ME][rankey] != INF:
-            cost[ME][rankey] = ranWt
-            cost[rankey][ME] = ranWt
-            bellman_ford()
+    if ERR:
+        if (currTim - startTim > CNGTIME):
+            rankey = random.randint(5001, 5005)
+            ranWt = random.randint(1, 9)
+            startTim = time.time()
+            if rankey not in broken_links and cost[ME][rankey] != INF:
+                cost[ME][rankey] = ranWt
+                cost[rankey][ME] = ranWt
+                bellman_ford()
